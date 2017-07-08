@@ -75,6 +75,7 @@ public class LoginPage extends AppCompatActivity {
 //user_id,driver
                             MainDataBAse db=new MainDataBAse(LoginPage.this);
                             db.open();
+                            db.deleteEntry();
                             db.addContact(new profile(userId,qrcode,""+1));
                             db.close();
                             Intent intent = new Intent(getApplicationContext(),

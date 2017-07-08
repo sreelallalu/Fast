@@ -138,7 +138,7 @@ private int type;
 		qrcode = profile.getQcode();
 		utype = profile.getType();
 		_userId = profile.getUser_id();
-
+        Log.e("usertype",utype);
 		type=Integer.parseInt(utype);
        Log.e("type",""+type);
 
