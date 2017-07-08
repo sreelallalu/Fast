@@ -77,9 +77,10 @@ public class LoginPage extends AppCompatActivity {
                             db.open();
                             db.addContact(new profile(userId,qrcode,""+1));
                             db.close();
-                            Intent i = new Intent(getApplicationContext(),
+                            Intent intent = new Intent(getApplicationContext(),
                                     MainActivity.class);
-                            startActivity(i);
+                            intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
+                            startActivity(intent);
                             finish();
 
                         }

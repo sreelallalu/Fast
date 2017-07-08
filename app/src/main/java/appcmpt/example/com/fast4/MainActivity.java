@@ -20,6 +20,7 @@ import org.json.JSONObject;
 import android.annotation.SuppressLint;
 import android.annotation.TargetApi;
 import android.app.AlertDialog;
+import android.app.PendingIntent;
 import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.DialogInterface;
@@ -306,8 +307,8 @@ private int type;
 							db.open();
 							db.deleteEntry();
 							db.close();
-							SharedPreferences.Editor editor = getPreferences(
-									MODE_PRIVATE).edit();
+							SharedPreferences.Editor editor=getSharedPreferences("USER", Context.MODE_PRIVATE).edit();
+
 							editor.putBoolean("register", false);
 							editor.putBoolean("typerr", false);
 							// db.addContact(new
@@ -444,24 +445,24 @@ private int type;
 					d.show();
 					break;*/
 				case 4:
-					fragment = new DriverDetails();
-					Bundle args=new Bundle();
-					args.putInt("key",1);
-					fragment.setArguments(args);
-					getSupportFragmentManager().beginTransaction()
-							.replace(R.id.frame_container, fragment).commit();
-					break;
-				case 5:
 					mDrawerLayout.closeDrawer(mDrawerList);
 					AlertDialog.Builder mbBuilder = new AlertDialog.Builder(
 							MainActivity.this);
-					mbBuilder.setMessage("Do yo want to quit?");
+					mbBuilder.setMessage("Do yo want to sign out?");
 					mbBuilder.setPositiveButton("Yes",
 							new OnClickListener() {
 
 								@Override
 								public void onClick(DialogInterface arg0, int arg1) {
 									// TODO Auto-generated method stub
+									SharedPreferences.Editor editor=getSharedPreferences("USER", Context.MODE_PRIVATE).edit();
+
+									editor.putBoolean("register", false);
+									editor.putBoolean("typerr", false);
+									editor.putString("buddyno", "");
+									// db.addContact(new
+									// profile(st_usertype,result.getString("code")));
+									editor.commit();
 									finish();
 								}
 							});
@@ -477,6 +478,44 @@ private int type;
 							});
 					AlertDialog quuit_dilg = mbBuilder.create();
 					quuit_dilg.show();
+
+					break;
+
+
+				case 5:
+					fragment = new DriverDetails();
+					Bundle args=new Bundle();
+					args.putInt("key",1);
+					fragment.setArguments(args);
+					getSupportFragmentManager().beginTransaction()
+							.replace(R.id.frame_container, fragment).commit();
+					break;
+				case 6:
+					mDrawerLayout.closeDrawer(mDrawerList);
+					AlertDialog.Builder mbBuilder1 = new AlertDialog.Builder(
+							MainActivity.this);
+					mbBuilder1.setMessage("Do yo want to quit?");
+					mbBuilder1.setPositiveButton("Yes",
+							new OnClickListener() {
+
+								@Override
+								public void onClick(DialogInterface arg0, int arg1) {
+									// TODO Auto-generated method stub
+									finish();
+								}
+							});
+					mbBuilder1.setNegativeButton("No",
+							new OnClickListener() {
+
+								@Override
+								public void onClick(DialogInterface dialog,
+													int which) {
+									// TODO Auto-generated method stub
+
+								}
+							});
+					AlertDialog quuit_dilg1 = mbBuilder1.create();
+					quuit_dilg1.show();
 
 					break;
 				default:
@@ -501,6 +540,26 @@ String driverid=DataDriverId.getInstance().getDistributor_id();
 			Toast.makeText(MainActivity.this, "start journey", Toast.LENGTH_SHORT).show();
 		return;
 		}else {
+
+			SharedPreferences prefs = getSharedPreferences("USER",Context.MODE_PRIVATE);
+			String buddyno = prefs.getString("buddyno","");
+			Log.e("buddyno",buddyno.length()+"");
+			if(buddyno!="")
+			{
+                try {
+					String content = "Help me I feel Unsafe.!" + "\n" + lattitude + "," + longitude;
+
+					Intent intent = new Intent(getApplicationContext(), MainActivity.class);
+					PendingIntent pi = PendingIntent.getActivity(getApplicationContext(), 0, intent, 0);
+					SmsManager sms = SmsManager.getDefault();
+					sms.sendTextMessage(buddyno, null, content, pi, null);
+				}catch (Exception e){
+e.printStackTrace();
+				}
+			}
+
+
+
 
 			HashMap<String, String> hashmap = new HashMap<>();
 			hashmap.put("tag", "unsafe");

@@ -3,6 +3,7 @@ package appcmpt.example.com.fast4;
 import android.annotation.TargetApi;
 import android.app.AlertDialog;
 import android.app.ProgressDialog;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -12,6 +13,7 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.support.v7.app.ActionBarActivity;
 import android.util.Log;
+import android.util.Patterns;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.ArrayAdapter;
@@ -49,7 +51,7 @@ import java.util.List;
 @TargetApi(Build.VERSION_CODES.HONEYCOMB)
 public class Register extends ActionBarActivity {
 	private Spinner vetype;
-	private EditText uname, vno,umob,uemail,us_pass;
+	private EditText uname, vno,umob,uemail,us_pass,us_buddy;
 	private Button register;
 	private String st_username,st_mobile,st_email;
 	private String st_vehnumber;
@@ -63,6 +65,8 @@ public class Register extends ActionBarActivity {
 	private Double dbl_latitude, dbl_longitude;
 
 	private final static String USER_AGENT = "Mozilla/5.0";
+	private TextView _login;
+	private String _buddyno="";
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -74,6 +78,7 @@ public class Register extends ActionBarActivity {
 		tvutype = (TextView) findViewById(R.id.tvusertypeinreg);
 		dseCt=(TextView)findViewById(R.id.dselect);
 		gps = new GPSTracker(getApplicationContext());
+		_login=(TextView)findViewById(R.id.driver_logins);
 		if (gps.canGetLocation()) {
 
 			dbl_latitude = gps.getLatitude();
@@ -93,10 +98,12 @@ public class Register extends ActionBarActivity {
 		uname = (EditText) findViewById(R.id.et_uname_register);
 		vno = (EditText) findViewById(R.id.et_vno_register);
 		us_pass = (EditText) findViewById(R.id.et_password);
+		us_buddy = (EditText) findViewById(R.id.et_uname_buddy);
 		//st_usertype ="Driver";
 		tvutype.setText("Driver");
 		register.setText("Register");
 		uemail.setVisibility(View.GONE);
+		us_buddy.setVisibility(View.GONE);
 		//us_pass.setVisibility(View.GONE);
 		us_pass.setHint("driver password");
 		List<String> spinnerArray_vetype = new ArrayList<String>();
@@ -110,6 +117,14 @@ public class Register extends ActionBarActivity {
 				.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
 
 		vetype.setAdapter(adapter_vetype);
+		_login.setOnClickListener(new OnClickListener() {
+			@Override
+			public void onClick(View view) {
+				Intent intent=new Intent(Register.this,LoginPage.class);
+			   startActivity(intent);
+
+			}
+		});
 		official.setOnClickListener(new OnClickListener() {
 
 			@Override
@@ -124,6 +139,8 @@ public class Register extends ActionBarActivity {
 				us_pass.setHint("driver password");
 				//us_pass.setVisibility(View.GONE);
 				dseCt.setVisibility(View.VISIBLE);
+				us_buddy.setVisibility(View.GONE);
+
 			}
 		});
 		citizen.setOnClickListener(new OnClickListener() {
@@ -139,13 +156,15 @@ public class Register extends ActionBarActivity {
 				//us_pass.setVisibility(View.VISIBLE);
 				us_pass.setHint("user password");
 				dseCt.setVisibility(View.INVISIBLE);
+				us_buddy.setVisibility(View.VISIBLE);
+
 			}
 		});
 		android.support.v7.app.ActionBar a = getSupportActionBar();
 		a.hide();
 		// finding widgets
 	db = new MainDataBAse(this);
-	SharedPreferences prefs = getPreferences(MODE_PRIVATE);
+	SharedPreferences prefs = getSharedPreferences("USER",Context.MODE_PRIVATE);
 		Boolean status = prefs.getBoolean("register", false);
 		Boolean type = prefs.getBoolean("typerr", false);
 		if (status) {
@@ -172,6 +191,7 @@ public class Register extends ActionBarActivity {
 					// TODO Auto-generated method stub
 
 					if (st_usertype != "Citizen") {
+						boolean check=true;
 
 						st_username = uname.getText().toString();
 						st_mobile = umob.getText().toString();
@@ -179,6 +199,28 @@ public class Register extends ActionBarActivity {
 						st_vehicle_type = vetype.getSelectedItem().toString();
 
 						String pass=us_pass.getText().toString();
+
+						if(st_username.isEmpty()||st_username.length()<3)
+						{
+							check=false;
+							uname.setError("minimum 3 letters");
+						}
+						if(st_mobile.isEmpty()||st_mobile.length()<10)
+						{
+							check=false;
+							umob.setError("minimum 10 digits");
+						}
+						if(st_vehnumber.isEmpty())
+						{
+							check=false;
+							vno.setError("invalid");
+						}
+						if(pass.isEmpty()||pass.length()<6)
+						{
+							check=false;
+							us_pass.setError("minimum 6 characters");
+						}
+						if(check){
 
 						HashMap<String, String> hashMap = new HashMap<String, String>();
 						hashMap.put("tag", "register");
@@ -192,13 +234,46 @@ public class Register extends ActionBarActivity {
 						//hashMap.put("");
 
 
-						Networking(hashMap);
+						Networking(hashMap);}
 						//new CheckAvialability().execute();
 					} else {
+						boolean check1=true;
 						st_username = uname.getText().toString();
 						st_mobile = umob.getText().toString();
 						st_email = uemail.getText().toString();
 						String pass=us_pass.getText().toString();
+						String buddy=us_buddy.getText().toString();
+						_buddyno=buddy;
+
+
+
+						if(st_username.isEmpty()||st_username.length()<3)
+						{
+							check1=false;
+							uname.setError("minimum 3 letters");
+						}
+						if(st_mobile.isEmpty()||st_mobile.length()<10)
+						{
+							check1=false;
+							umob.setError("minimum 10 digits");
+						}
+						if(buddy.isEmpty()||buddy.length()<10)
+						{
+							check1=false;
+							us_buddy.setError("minimum 10 digits");
+						}
+						if(st_email.isEmpty()||!Patterns.EMAIL_ADDRESS.matcher(st_email).matches()){
+							check1=false;
+							uemail.setError("invalid mail id");
+
+						}
+						if(pass.isEmpty()||pass.length()<6)
+						{
+							check1=false;
+							us_pass.setError("minimum 6 characters");
+						}
+						if(check1){
+
 						HashMap<String, String> hashMap = new HashMap<String, String>();
 						hashMap.put("tag", "user_register");
 						hashMap.put("name", st_username);
@@ -206,7 +281,7 @@ public class Register extends ActionBarActivity {
 						hashMap.put("Location",""+dbl_latitude+","+dbl_longitude);
 						hashMap.put("email", st_email);
 						hashMap.put("password",pass);
-						Networking(hashMap);
+						Networking(hashMap);}
 					/*final String POPUP_LOGIN_TITLE = "Add Buddy";
 					final String POPUP_LOGIN_TEXT = "Add two mobile numbers for emergency alert";
 					final String NUMBER1 = "--number1--";
@@ -296,9 +371,8 @@ public class Register extends ActionBarActivity {
 						if(type==1)
 						{
 
+                         SharedPreferences.Editor editor=getSharedPreferences("USER", Context.MODE_PRIVATE).edit();
 
-							SharedPreferences.Editor editor = getPreferences(
-									MODE_PRIVATE).edit();
 							editor.putBoolean("register", true);
 							editor.putBoolean("typerr", false);
 							editor.commit();
@@ -324,10 +398,11 @@ public class Register extends ActionBarActivity {
 						}
 						else{
 
-							SharedPreferences.Editor editor = getPreferences(
-									MODE_PRIVATE).edit();
+							SharedPreferences.Editor editor=getSharedPreferences("USER", Context.MODE_PRIVATE).edit();
+
 							editor.putBoolean("register", true);
 							editor.putBoolean("typerr", true);
+							editor.putString("buddyno", _buddyno);
 							JSONObject jh=jsonObject.getJSONObject("user_details");
 
 							 String ids=jh.getString("id");
